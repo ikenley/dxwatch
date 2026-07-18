@@ -27,6 +27,13 @@ THE NODE
     Clipper Contest Club, the closest reliable node to Worcester. Change
     HOST/PORTS below to point somewhere else.
 
+    Login handshake (verified against W1NR, July 2026): on connect the
+    node sends a short banner and then the prompt "login: " -- with NO
+    trailing newline. So the prompt can never be detected by waiting for
+    a complete line; login has to read raw chunks. Only after we answer
+    with a callsign does the node start sending newline-terminated
+    traffic (the spot stream, command replies).
+
 A NOTE FOR A C / SMALLTALK READER
     * This is cooperative multitasking, not OS threads. asyncio runs a
       single event loop -- think of it as a select() loop in C, or as
@@ -108,10 +115,33 @@ class Monitor:
         await self.writer.drain()
 
     async def run(self):
+        # Strictly sequential: finish the login handshake first, THEN start
+        # the two concurrent jobs. This guarantees users_loop can never send
+        # a command while the node is still sitting at its login prompt.
+        await self.login()
         # asyncio.gather runs both coroutines on the one loop. If either
         # raises (e.g. the reader hits EOF), gather re-raises and we fall
         # back out to the reconnect loop in main().
         await asyncio.gather(self.reader_loop(), self.users_loop())
+
+    # -- login handshake ----------------------------------------------------
+
+    async def login(self):
+        # The "login: " prompt has no trailing newline (see THE NODE above),
+        # so readline() would block on it forever. Instead read raw chunks --
+        # the same as recv() into a buffer in C -- and watch the accumulated
+        # text for the prompt.
+        buf = ""
+        while True:
+            chunk = await self.reader.read(256)
+            if not chunk:                     # EOF before we even logged in
+                raise ConnectionError("node closed the connection at login")
+            buf += chunk.decode("utf-8", "replace")
+            if LOGIN_RE.search(buf):
+                await self.send(CALLSIGN)
+                self.logged_in = True
+                print(f"logged in as {CALLSIGN}")
+                return
 
     # -- the two concurrent jobs -------------------------------------------
 
@@ -144,12 +174,6 @@ class Monitor:
 
         if self.capturing_users:
             self.user_lines.append(line)
-            return
-
-        if not self.logged_in and LOGIN_RE.search(line):
-            self.logged_in = True
-            # fire-and-forget: schedule the login write on the loop
-            asyncio.ensure_future(self.send(CALLSIGN))
 
     def record_spot(self, m):
         spotter = normalize_spotter(m.group("spotter"))
