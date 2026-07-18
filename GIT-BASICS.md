@@ -27,7 +27,7 @@ Every session, in this order:
    git status
    ```
 
-4. **`git add <file>`** — stage the file(s) you want in the next commit.
+4. **`git add <file>`** — stage the file(s) you want in the next commit. -or-
    **`git add *`** — (Optional) shortcut that stages all files.
 
    ```
