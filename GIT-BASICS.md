@@ -1,8 +1,8 @@
 # Git basics for this repo
 
 You and your son are sharing one repo, working straight on `main`, no
-branches. That keeps things simple: the whole workflow is *pull, edit,
-add, commit, push*, repeated.
+branches. That keeps things simple: the whole workflow is _pull, edit,
+add, commit, push_, repeated.
 
 Think of a **commit** as a saved snapshot of the whole project at a point
 in time — closer to a checkpoint than a diff, though it stores only what
@@ -22,21 +22,26 @@ Every session, in this order:
 
 3. **`git status`** — see what you touched. Worth running often; it costs
    nothing and tells you exactly where you stand.
+
    ```
    git status
    ```
 
 4. **`git add <file>`** — stage the file(s) you want in the next commit.
+   **`git add *`** — (Optional) shortcut that stages all files.
+
    ```
    git add dxwatch.py
    ```
+
    Staging is git's own concept — think of it as a holding area you build
    up before you commit, so a commit can bundle exactly the files you
    mean it to, not just "everything that changed."
 
 5. **`git commit -m "message"`** — take the snapshot. The message should
-   say *why*, briefly — "add band filter to spot output" is more useful
+   say _why_, briefly — "add band filter to spot output" is more useful
    later than "changes."
+
    ```
    git commit -m "add band filter to spot output"
    ```
@@ -54,17 +59,19 @@ can skip straight to step 2 having already pulled at the start.
 
 - **`git diff`** — see exactly what changed, line by line, before you
   stage it. Good habit before every `git add`.
+
   ```
   git diff
   ```
 
 - **`git log`** — see the commit history (who changed what, and the
   messages left behind).
+
   ```
   git log --oneline
   ```
 
-- **`git checkout -- <file>`** — throw away *uncommitted* edits to a
+- **`git checkout -- <file>`** — throw away _uncommitted_ edits to a
   file and revert it to the last commit. Useful if you've made a mess
   and want to start that file over. There's no undo past this, so check
   `git diff` first if you're not sure.
@@ -84,5 +91,5 @@ recoverable situation, not a sign anything is broken.
 
 For anything beyond this — branches, undoing a bad commit, and the rest
 of git's much larger toolbox — the "Git Basics" chapter of the free
-*Pro Git* book is the standard reference:
+_Pro Git_ book is the standard reference:
 https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository
